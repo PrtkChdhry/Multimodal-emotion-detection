@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Detection System</title>
+    <style>
+        /* Base Styles */
+        :root {
+            --primary-color: #4285f4;
+            --success-color: #34a853;
+            --danger-color: #ea4335;
+            --warning-color: #fbbc05;
+            --info-color: #9C27B0;
+            --neutral-color: #9E9E9E;
+            --dark-color: #202124;
+            --light-color: #f8f9fa;
+            --border-color: #dadce0;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1, h2, h3, h4 {
+            color: var(--dark-color);
+            margin-bottom: 15px;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.2rem;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+        
+        h3 {
+            font-size: 1.4rem;
+        }
+        
+        h4 {
+            font-size: 1.2rem;
+        }
+        
+        /* Section Styles */
+        .section {
+            margin-bottom: 40px;
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: white;
+        }
+        
+        /* Video Feed Styles */
+        #videoFeed {
+            display: block;
+            margin: 0 auto;
+            border: 3px solid var(--border-color);
+            border-radius: 4px;
+            max-width: 100%;
+            height: auto;
+        }
+        
+        /* Button Styles */
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            margin: 5px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        .btn-info {
+            background-color: var(--info-color);
+            color: white;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* Controls Section */
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        /* Result Display */
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: var(--light-color);
+            text-align: center;
+        }
+        
+        #emotionResult {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 10px 0;
+        }
+        
+        #confidenceResult {
+            font-size: 1.2rem;
+            color: #666;
+        }
+        
+        /* Upload Section */
+        .upload-section {
+            margin: 30px 0;
+            padding: 25px;
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            background-color: #f8f9fa;
+        }
+        
+        .file-input-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        #videoUpload {
+            display: none;
+        }
+        
+        .file-input-label {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .file-input-label:hover {
+            background-color: #3367d6;
+        }
+        
+        .file-name {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        #progressBar {
+            width: 0%;
+            height: 30px;
+            background-color: var(--success-color);
+            border-radius: 4px;
+            text-align: center;
+            line-height: 30px;
+            color: white;
+            font-weight: bold;
+            transition: width 0.3s;
+        }
+        
+        /* Analysis Results */
+        #analysisResults {
+            margin-top: 30px;
+        }
+        
+        /* Emotion Distribution */
+        .emotion-distribution {
+            margin: 20px 0;
+        }
+        
+        .emotion-bar-container {
+            margin-bottom: 15px;
+        }
+        
+        .emotion-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .progress {
+            height: 20px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            transition: width 0.6s ease;
+        }
+        
+        /* Timeline */
+        .timeline-container {
+            margin: 25px 0;
+        }
+        
+        .timeline {
+            display: flex;
+            height: 50px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        
+        .timeline-segment {
+            height: 100%;
+            position: relative;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .timeline-segment:hover {
+            transform: scaleY(1.3);
+            z-index: 1;
+        }
+        
+        .timeline-label {
+            position: absolute;
+            bottom: -25px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 11px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .timeline-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+            margin-right: 5px;
+        }
+        
+        /* Transitions */
+        .transitions-list {
+            list-style-type: none;
+        }
+        
+        .transition-item {
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--primary-color);
+            border-radius: 4px;
+        }
+        
+        /* Suggestions */
+        .suggestions-container {
+            margin-top: 25px;
+        }
+        
+        .suggestion-card {
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .suggestion-card .card-header {
+            background-color: rgba(66, 133, 244, 0.1);
+        }
+        
+        /* Emotion Colors */
+        .emotion-happy { background-color: var(--success-color); }
+        .emotion-sad { background-color: #2196F3; }
+        .emotion-angry { background-color: var(--danger-color); }
+        .emotion-surprise { background-color: var(--warning-color); }
+        .emotion-fear { background-color: var(--info-color); }
+        .emotion-disgust { background-color: #795548; }
+        .emotion-neutral { background-color: var(--neutral-color); }
+        
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: 500;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 10px;
+            color: white;
+        }
+        
+        /* Cards */
+        .card {
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        /* Grid System */
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -15px;
+        }
+        
+        .col {
+            flex: 1;
+            padding: 0 15px;
+            min-width: 300px;
+        }
+        
+        /* Loading Spinner */
+        .spinner-container {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(66, 133, 244, 0.2);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Alert Messages */
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .section {
+                padding: 15px;
+            }
+            
+            #videoFeed {
+                width: 100%;
+            }
+            
+            .controls {
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Emotion Detection System</h1>
+        
+        <!-- Real-time Detection Section -->
+        <div class="section">
+            <h2>Real-time Detection</h2>
+            <img id="videoFeed" src="{{ url_for('video_feed') }}" width="640" height="480">
+            
+            <div class="controls">
+                <button id="startBtn" class="btn btn-success">Start Detection</button>
+                <button id="stopBtn" class="btn btn-danger">Stop Detection</button>
+                <button id="downloadBtn" class="btn btn-primary">Download Report</button>
+            </div>
+            
+            <div class="result">
+                <h3>Current Emotion</h3>
+                <p id="emotionResult">Not detected</p>
+                <p id="confidenceResult"></p>
+            </div>
+        </div>
+        
+        <!-- Video Upload Section -->
+        <div class="section upload-section">
+            <h2>Video Analysis</h2>
+            <p>Upload a video file for detailed emotion analysis (MP4, AVI, MOV, MKV)</p>
+            
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="file-input-container">
+                    <label for="videoUpload" class="file-input-label">
+                        <i class="fas fa-upload"></i> Choose Video File
+                    </label>
+                    <input type="file" id="videoUpload" name="file" accept="video/*" required>
+                    <div class="file-name" id="fileName">No file selected</div>
+                </div>
+                
+                <div class="progress-container" id="progressContainer">
+                    <div id="progressBar">0%</div>
+                </div>
+                
+                <button type="submit" id="analyzeBtn" class="btn btn-info">
+                    Analyze Video 
+                </button>
+            </form>
+            
+            <div id="analysisResults"></div>
+        </div>
+    </div>
+
+    <script>
+        // Update emotion display
+        function updateEmotion() {
+    fetch('/get_emotion')
+        .then(response => response.json())
+        .then(data => {
+            const confidencePercent = Math.round(data.confidence * 100);
+            document.getElementById('emotionResult').textContent = data.emotion;
+            document.getElementById('confidenceResult').textContent = 
+                `Confidence: ${confidencePercent}%`;
+            
+            // Update progress bar if you have one
+            const confidenceBar = document.getElementById('confidenceBar');
+            if (confidenceBar) {
+                confidenceBar.style.width = `${confidencePercent}%`;
+                confidenceBar.textContent = `${confidencePercent}%`;
+            }
+        });
+    
+    setTimeout(updateEmotion, 1000);
+}
+        
+        // Button event listeners
+        document.getElementById('startBtn').addEventListener('click', () => {
+            fetch('/start_detection')
+                .then(response => response.json())
+                .then(data => console.log(data.status));
+        });
+        
+        document.getElementById('stopBtn').addEventListener('click', () => {
+            fetch('/stop_detection')
+                .then(response => response.json())
+                .then(data => console.log(data.status));
+        });
+        
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            window.location.href = '/download_report';
+        });
+        
+        // File input handling
+        document.getElementById('videoUpload').addEventListener('change', function(e) {
+            const fileName = this.files[0] ? this.files[0].name : 'No file selected';
+            document.getElementById('fileName').textContent = fileName;
+        });
+        
+        // Handle video upload and analysis
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData();
+            const fileInput = document.getElementById('videoUpload');
+            const resultsDiv = document.getElementById('analysisResults');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            
+            if (fileInput.files.length === 0) {
+                resultsDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        Please select a video file first
+                    </div>
+                `;
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            formData.append('file', file);
+            
+            // Show loading state
+            resultsDiv.innerHTML = `
+                <div class="spinner-container">
+                    <div class="spinner"></div>
+                    <h4>Analyzing Video...</h4>
+                    <p>Processing video frames every 3 seconds. This may take a moment.</p>
+                </div>
+            `;
+            
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+            progressBar.textContent = '0%';
+            
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            analyzeBtn.disabled = true;
+            analyzeBtn.textContent = 'Analyzing...';
+            
+            // Create XMLHttpRequest for progress tracking
+            const xhr = new XMLHttpRequest();
+            
+            // Upload progress
+            xhr.upload.addEventListener('progress', function(e) {
+                if (e.lengthComputable) {
+                    const percent = Math.round((e.loaded / e.total) * 100);
+                    progressBar.style.width = percent + '%';
+                    progressBar.textContent = percent + '%';
+                }
+            });
+            
+            xhr.open('POST', '/analyze_video', true);
+            
+            xhr.onload = function() {
+                progressContainer.style.display = 'none';
+                analyzeBtn.disabled = false;
+                analyzeBtn.textContent = 'Analyze Video (Every 3 Seconds)';
+                
+                if (xhr.status === 200) {
+                    const data = JSON.parse(xhr.responseText);
+                    displayAnalysisResults(data);
+                } else {
+                    const error = JSON.parse(xhr.responseText).error || 'Unknown error occurred';
+                    resultsDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <h4>Error Processing Video</h4>
+                            <p>${error}</p>
+                        </div>
+                    `;
+                }
+            };
+            
+            xhr.onerror = function() {
+                resultsDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h4>Network Error</h4>
+                        <p>Failed to connect to the server. Please try again.</p>
+                    </div>
+                `;
+                analyzeBtn.disabled = false;
+                analyzeBtn.textContent = 'Analyze Video (Every 3 Seconds)';
+                progressContainer.style.display = 'none';
+            };
+            
+            xhr.send(formData);
+        });
+        
+        function displayAnalysisResults(data) {
+            const resultsDiv = document.getElementById('analysisResults');
+            
+            // Create HTML for the results
+            let html = `
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Video Analysis Report</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col">
+                                <h4>Video Information</h4>
+                                <p><strong>Filename:</strong> ${data.video_info.filename}</p>
+                                <p><strong>Duration:</strong> ${data.video_info.duration.toFixed(1)} seconds</p>
+                                <p><strong>Analysis Points:</strong> ${data.video_info.analyzed_points} (every 3 seconds)</p>
+                            </div>
+                            <div class="col">
+                                <h4>Summary</h4>
+                                <p><strong>Dominant Emotion:</strong> <span class="badge emotion-${data.report.summary.dominant_emotion.toLowerCase()}">
+                                    ${data.report.summary.dominant_emotion}
+                                </span></p>
+                                <p><strong>Average Confidence:</strong> ${(data.report.summary.average_confidence * 100).toFixed(1)}%</p>
+                                <p><strong>Total Transitions:</strong> ${data.report.summary.total_transitions}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="emotion-distribution">
+                            <h4>Emotion Distribution</h4>
+                            ${Object.entries(data.report.summary.emotion_distribution)
+                                .sort((a, b) => b[1] - a[1])
+                                .map(([emotion, count]) => {
+                                    const percentage = (count / data.results.length * 100).toFixed(1);
+                                    return `
+                                        <div class="emotion-bar-container">
+                                            <div class="emotion-label">
+                                                <span>${emotion}</span>
+                                                <span>${count} (${percentage}%)</span>
+                                            </div>
+                                            <div class="progress">
+                                                <div class="progress-bar emotion-${emotion.toLowerCase()}" 
+                                                    style="width: ${percentage}%"></div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                        </div>
+                        
+                        <div class="timeline-container">
+                            <h4>Emotion Timeline</h4>
+                            <div class="timeline">
+                                ${data.report.timeline.map(segment => {
+                                    const width = (segment.duration / data.video_info.duration) * 100;
+                                    return `
+                                        <div class="timeline-segment emotion-${segment.emotion.toLowerCase()}" 
+                                            style="width: ${width}%"
+                                            title="${segment.emotion} (${segment.duration.toFixed(1)}s)">
+                                            <span class="timeline-label">${segment.emotion}</span>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                            <div class="timeline-legend">
+                                ${Object.keys(data.report.summary.emotion_distribution)
+                                    .map(emotion => `
+                                        <div class="legend-item">
+                                            <span class="legend-color emotion-${emotion.toLowerCase()}"></span>
+                                            <span>${emotion}</span>
+                                        </div>
+                                    `).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="transitions-container">
+                            <h4>Emotion Transitions</h4>
+                            <ul class="transitions-list">
+                                ${data.report.transitions.map(transition => `
+                                    <li class="transition-item">
+                                        Changed from <span class="badge emotion-${transition.from.toLowerCase()}">${transition.from}</span>
+                                        to <span class="badge emotion-${transition.to.toLowerCase()}">${transition.to}</span>
+                                        at ${transition.at}
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                        
+                        <div class="suggestions-container">
+                            <h4>Suggestions</h4>
+                            <div class="card suggestion-card">
+                                <div class="card-header">
+                                    <h5>Overall Suggestion</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p>${data.report.suggestions.overall}</p>
+                                </div>
+                            </div>
+                            
+                            <h5>Emotion-specific Suggestions</h5>
+                            <div class="row">
+                                ${Object.entries(data.report.suggestions.per_emotion)
+                                    .map(([emotion, suggestion]) => `
+                                        <div class="col">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h5>${emotion}</h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <p>${suggestion}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                            </div>
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 30px;">
+                            <button id="downloadVideoReport" class="btn btn-primary">
+                                Download Full Report (Excel)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            resultsDiv.innerHTML = html;
+            
+            // Add download button functionality
+            document.getElementById('downloadVideoReport').addEventListener('click', function() {
+                downloadVideoReport(data);
+            });
+        }
+        
+        function downloadVideoReport(data) {
+    // Create a temporary form to submit the data
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/download_video_report';
+    
+    // Add CSRF token if you're using Flask-WTF
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+    if (csrfToken) {
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrf_token';
+        csrfInput.value = csrfToken;
+        form.appendChild(csrfInput);
+    }
+    
+    // Add the report data as a hidden input
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'report_data';
+    input.value = JSON.stringify(data);
+    form.appendChild(input);
+    
+    // Add the form to the page and submit it
+    document.body.appendChild(form);
+    form.submit();
+    
+    // Clean up after submission
+    setTimeout(() => {
+        document.body.removeChild(form);
+    }, 100);
+}
+        
+        // Start updating emotion
+        updateEmotion();
+    </script>
+</body>
+</html>
