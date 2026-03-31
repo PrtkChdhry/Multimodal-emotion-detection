@@ -1,4 +1,0 @@
-1. Install all the dependencies. (Given in requirements.txt, if still anyone is missed download that also).
-2. Keep the structure of the files same.
-3. Run the app.py files
-4. Go to localhost http://127.0.0.1:5000/
